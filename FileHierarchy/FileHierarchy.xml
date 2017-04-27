@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FileHierarchy</name>
+    </assembly>
+    <members>
+        <member name="T:FileHierarchy.App_Start.UnityConfig">
+            <summary>
+            Specifies the Unity configuration for the main container.
+            </summary>
+        </member>
+        <member name="M:FileHierarchy.App_Start.UnityConfig.GetConfiguredContainer">
+            <summary>
+            Gets the configured Unity container.
+            </summary>
+        </member>
+        <member name="M:FileHierarchy.App_Start.UnityConfig.RegisterTypes(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>Registers the type mappings with the Unity container.</summary>
+            <param name="container">The unity container to configure.</param>
+            <remarks>There is no need to register concrete types such as controllers or API controllers (unless you want to 
+            change the defaults), as Unity allows resolving a concrete type even if it was not previously registered.</remarks>
+        </member>
+        <member name="T:FileHierarchy.App_Start.UnityWebApiActivator">
+            <summary>Provides the bootstrapping for integrating Unity with WebApi when it is hosted in ASP.NET</summary>
+        </member>
+        <member name="M:FileHierarchy.App_Start.UnityWebApiActivator.Start">
+            <summary>Integrates Unity when the application starts.</summary>
+        </member>
+        <member name="M:FileHierarchy.App_Start.UnityWebApiActivator.Shutdown">
+            <summary>Disposes the Unity container when the application is shut down.</summary>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FileController.Get(System.String)">
+            <summary>
+                Gets all the files matching search criteria
+            </summary>
+            <param name="query">Substring to search</param>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FileController.GetFile(System.Int32)">
+            <summary>
+                Gets specific file details
+            </summary>
+            <param name="id">File ID</param>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FileController.PutFile(System.Int32,FileHierarchy.ViewModel.FileViewModel)">
+            <summary>
+                Updates the file
+            </summary>
+            <param name="id">File ID</param>
+            <param name="fileViewModel">Model to update</param>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FileController.PostFile(FileHierarchy.ViewModel.FileViewModel)">
+            <summary>
+                Creates a file
+            </summary>
+            <param name="fileViewModel">File model</param>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FileController.DeleteFile(System.Int32)">
+            <summary>
+                Delete the file
+            </summary>
+            <param name="id">File ID</param>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FolderController.GetChildren(System.Int32)">
+            <summary>
+            Get the sub-items of specified folder
+            </summary>
+            <param name="id">Folder ID</param>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FolderController.GetFolder(System.Int32)">
+            <summary>
+                Get the folder with specified identifier
+            </summary>
+            <param name="id">Folder ID</param>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FolderController.PutFolder(System.Int32,FileHierarchy.ViewModel.FileViewModel)">
+            <summary>
+                Updates the folder
+            </summary>
+            <param name="id">Folder ID</param>
+            <param name="fileViewModel">Folder model</param>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FolderController.PostFolder(FileHierarchy.ViewModel.FileViewModel)">
+            <summary>
+                Creates new folder
+            </summary>
+            <param name="viewModel">Folder model</param>
+        </member>
+        <member name="M:FileHierarchy.Controllers.FolderController.DeleteFolder(System.Int32)">
+            <summary>
+                Deletes the folder
+            </summary>
+            <param name="id">Folder ID</param>
+        </member>
+    </members>
+</doc>
