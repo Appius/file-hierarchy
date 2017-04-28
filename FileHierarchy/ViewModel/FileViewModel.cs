@@ -22,11 +22,14 @@ namespace FileHierarchy.ViewModel
 		{
 			var fileEntityUpdater = new FileEntityUpdater(fileEntity, folderRepository);
 
-			if (string.IsNullOrWhiteSpace(Name) && fileEntity.Name != Name)
+			if (!string.IsNullOrWhiteSpace(Name) && fileEntity.Name != Name)
 				fileEntityUpdater.ChangeName(Name);
 
 			if (SeqNum > 0 && SeqNum != fileEntity.SeqNum)
+			{
 				fileEntityUpdater.ChangeSeqNum(SeqNum);
+				fileEntity.SeqNum = SeqNum;
+			}
 		}
 
 		public int GetNextSeqNumber(IFolderRepository folderRepository, FileEntity fileEntity)

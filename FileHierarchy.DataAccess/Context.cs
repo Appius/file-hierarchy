@@ -6,9 +6,8 @@ namespace FileHierarchy.DataAccess
 {
 	public class Context : DbContext
 	{
-		public Context() : base("Default")
+		public Context() : base("Azure")
 		{
-			//Database.SetInitializer(new Initializer());
 		}
 
 		public virtual DbSet<FileEntity> Entities { get; set; }

@@ -19,7 +19,7 @@ namespace FileHierarchy.DataAccess.Configurations
 			HasMany(e => e.Descendants)
 				.WithRequired(e => e.Child)
 				.HasForeignKey(e => e.ChildId)
-				.WillCascadeOnDelete(false);
+				.WillCascadeOnDelete(true);
 		}
 	}
 }

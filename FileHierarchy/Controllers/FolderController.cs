@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Description;
+using FileHierarchy.BusinessFacade;
 using FileHierarchy.Common.Abstract;
 using FileHierarchy.Common.Models;
 using FileHierarchy.Mappers;
@@ -33,7 +34,7 @@ namespace FileHierarchy.Controllers
 			if (folder == null)
 				return NotFound();
 
-			var fileEntities = FolderRepository.GetChildren(id);
+			var fileEntities = FolderRepository.GetChildren(id).ToList();
 			var fileViewModels = fileEntities.Select(e => e.ToFileViewModel());
 			return Ok(fileViewModels);
 		}
@@ -70,10 +71,11 @@ namespace FileHierarchy.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var folder = fileViewModel.ToFileEntity();
-			if (id != folder.Id)
-				return BadRequest();
+			var folder = FolderRepository.Get(id);
+			if (folder == null)
+				return NotFound();
 
+			FolderRepository.MarkModified(folder);
 			fileViewModel.UpdateFileEntity(FolderRepository, folder);
 
 			try
@@ -131,7 +133,15 @@ namespace FileHierarchy.Controllers
 			if (fileEntity == null)
 				return NotFound();
 
-			FileRepository.Remove(fileEntity);
+			var fileUpdater = new FileEntityUpdater(fileEntity, FolderRepository);
+			fileUpdater.ChangeSeqNum(int.MaxValue);
+
+			FolderRepository.SaveInTransaction(r =>
+			{
+				r.Save();
+				r.Remove(fileEntity);
+			});
+
 			return Ok(fileEntity);
 		}
 	}

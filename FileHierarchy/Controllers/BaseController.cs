@@ -1,6 +1,5 @@
 ﻿using System.Web.Http;
 using FileHierarchy.Common.Abstract;
-using FileHierarchy.DataAccess.Repositories;
 
 namespace FileHierarchy.Controllers
 {

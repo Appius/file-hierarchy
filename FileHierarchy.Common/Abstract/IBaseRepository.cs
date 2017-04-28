@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using FileHierarchy.Common.Models;
 
 namespace FileHierarchy.Common.Abstract
@@ -15,5 +16,7 @@ namespace FileHierarchy.Common.Abstract
 		void Remove(FileEntity fileEntity);
 		void Save();
 		void Update(FileEntity fileEntity);
+		void SaveInTransaction(Action action);
+		void SaveInTransaction(Action<IBaseRepository> action);
 	}
 }

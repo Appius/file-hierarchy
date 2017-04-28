@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using FileHierarchy.Common.Abstract;
 using FileHierarchy.Common.Models;
-using FileHierarchy.DataAccess.Repositories;
 
 namespace FileHierarchy.BusinessFacade
 {
@@ -36,15 +33,11 @@ namespace FileHierarchy.BusinessFacade
 
 				_folderRepository.MarkModified(affectedEntity);
 			}
-
-			_fileEntity.SeqNum = newSeqNum;
-			_folderRepository.MarkModified(_fileEntity);
 		}
 
 		public void ChangeName(string name)
 		{
 			_fileEntity.Name = name;
-			_folderRepository.MarkModified(_fileEntity);
 		}
 
 		public int GetMaxSeqNum()
@@ -61,10 +54,7 @@ namespace FileHierarchy.BusinessFacade
 					.Where(f => f.ParentId == null);
 			}
 
-			return _folderRepository.Entities()
-				.Include(f => f.Children)
-				.Where(f => f.Id == _fileEntity.ParentId.Value)
-				.SelectMany(p => p.Children);
+			return _folderRepository.GetChildren(_fileEntity.ParentId.Value);
 		}
 
 		private static Func<FileEntity, bool> SelectRange(int seqNum, int newSeqNum)
@@ -72,7 +62,7 @@ namespace FileHierarchy.BusinessFacade
 			if (seqNum < newSeqNum)
 				return c => c.SeqNum > seqNum && c.SeqNum <= newSeqNum;
 
-			return c => c.SeqNum > newSeqNum && c.SeqNum <= seqNum;
+			return c => c.SeqNum >= newSeqNum && c.SeqNum < seqNum;
 		}
 	}
 }

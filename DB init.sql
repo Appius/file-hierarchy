@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------------------------------------------------------
 -- DROPPING TABLES
 ------------------------------------------------------------------------------------------------------------------------------
-
 IF (EXISTS (SELECT * 
             FROM INFORMATION_SCHEMA.TABLES 
             WHERE TABLE_SCHEMA = 'dbo'
@@ -22,17 +21,6 @@ END
 ------------------------------------------------------------------------------------------------------------------------------
 -- CREATING ENTITIES TABLE
 ------------------------------------------------------------------------------------------------------------------------------
-
-USE [Test]
-GO
-
-/****** Object:  Table [dbo].[Entities]    Script Date: 26-Apr-17 12:50:53 ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
 CREATE TABLE [dbo].[Entities](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
 	[ParentId] [int] NULL,
@@ -57,16 +45,6 @@ GO
 ------------------------------------------------------------------------------------------------------------------------------
 -- CREATING TREE TABLE
 ------------------------------------------------------------------------------------------------------------------------------
-USE [Test]
-GO
-
-/****** Object:  Table [dbo].[Tree]    Script Date: 27-Apr-17 06:17:01 ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
 CREATE TABLE [dbo].[Tree](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
 	[ParentId] [int] NOT NULL,
@@ -134,7 +112,7 @@ WHERE [h].[ParentId] IS NOT NULL;
 GO
 
 CREATE TRIGGER [DeleteHierarchy] ON [dbo].[Entities]
-AFTER DELETE
+BEFORE DELETE
 AS
     DELETE [t]
     FROM [Tree] [t]

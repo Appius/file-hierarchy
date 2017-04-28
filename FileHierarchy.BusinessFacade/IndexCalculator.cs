@@ -6,6 +6,10 @@ namespace FileHierarchy.BusinessFacade
 {
 	public static class IndexCalculator
 	{
+		/// <summary>
+		///     Calculates an index for the specifix fileEntity
+		/// </summary>
+		/// <exception cref="ArgumentException">If fileEntity is null</exception>
 		public static string Calculate(FileEntity fileEntity)
 		{
 			if (fileEntity == null)

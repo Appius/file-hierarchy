@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Description;
+using FileHierarchy.BusinessFacade;
 using FileHierarchy.Common.Abstract;
 using FileHierarchy.Common.Models;
 using FileHierarchy.Mappers;
@@ -65,11 +66,16 @@ namespace FileHierarchy.Controllers
 			if (fileEntity == null)
 				return NotFound();
 
+			FileRepository.MarkModified(fileEntity);
 			fileViewModel.UpdateFileEntity(FolderRepository, fileEntity);
 
 			try
 			{
-				FileRepository.Save();
+				FolderRepository.SaveInTransaction(() =>
+				{
+					FolderRepository.Save();
+					FileRepository.Save();
+				});
 			}
 			catch (DbUpdateConcurrencyException)
 			{
@@ -121,7 +127,15 @@ namespace FileHierarchy.Controllers
 			if (fileEntity == null)
 				return NotFound();
 
-			FileRepository.Remove(fileEntity);
+			var fileUpdater = new FileEntityUpdater(fileEntity, FolderRepository);
+			fileUpdater.ChangeSeqNum(int.MaxValue);
+
+			FolderRepository.SaveInTransaction(() =>
+			{
+				FolderRepository.Save();
+				FileRepository.Remove(fileEntity);
+			});
+
 			return Ok(fileEntity);
 		}
 	}

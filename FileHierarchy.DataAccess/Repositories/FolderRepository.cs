@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data.Entity;
+﻿using System.Data.Entity;
 using System.Linq;
 using FileHierarchy.Common.Abstract;
 using FileHierarchy.Common.Models;

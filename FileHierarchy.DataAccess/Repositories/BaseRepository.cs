@@ -1,11 +1,12 @@
-﻿using System.Data.Entity;
+﻿using System;
+using System.Data.Entity;
 using System.Linq;
 using FileHierarchy.Common.Abstract;
 using FileHierarchy.Common.Models;
 
 namespace FileHierarchy.DataAccess.Repositories
 {
-	public abstract class BaseRepository : IBaseRepository
+	public abstract class BaseRepository : IBaseRepository, IDisposable
 	{
 		protected Context Context = new Context();
 
@@ -26,6 +27,24 @@ namespace FileHierarchy.DataAccess.Repositories
 		public void Save() => Context.SaveChanges();
 
 		public bool Exists(int id) => Entities().Count(e => e.Id == id) > 0;
+
+		public void SaveInTransaction(Action action)
+		{
+			using (var dbContextTransaction = Context.Database.BeginTransaction())
+			{
+				action();
+				dbContextTransaction.Commit();
+			}
+		}
+
+		public void SaveInTransaction(Action<IBaseRepository> action)
+		{
+			using (var dbContextTransaction = Context.Database.BeginTransaction())
+			{
+				action(this);
+				dbContextTransaction.Commit();
+			}
+		}
 
 		#region CRUD
 
