@@ -8,12 +8,12 @@ namespace FileHierarchy.BusinessFacade
 	public class FileEntityUpdater
 	{
 		private readonly FileEntity _fileEntity;
-		private readonly IFolderRepository _folderRepository;
+		private readonly IFileRepository _fileRepository;
 
-		public FileEntityUpdater(FileEntity fileEntity, IFolderRepository folderRepository)
+		public FileEntityUpdater(FileEntity fileEntity, IFileRepository fileRepository)
 		{
 			_fileEntity = fileEntity;
-			_folderRepository = folderRepository;
+			_fileRepository = fileRepository;
 		}
 
 		public void ChangeSeqNum(int newSeqNum)
@@ -31,7 +31,7 @@ namespace FileHierarchy.BusinessFacade
 				else
 					affectedEntity.SeqNum++;
 
-				_folderRepository.MarkModified(affectedEntity);
+				_fileRepository.MarkModified(affectedEntity);
 			}
 		}
 
@@ -50,11 +50,11 @@ namespace FileHierarchy.BusinessFacade
 		{
 			if (_fileEntity.ParentId == null)
 			{
-				return _folderRepository.AllEntities()
+				return _fileRepository.Entities()
 					.Where(f => f.ParentId == null);
 			}
 
-			return _folderRepository.GetChildren(_fileEntity.ParentId.Value);
+			return _fileRepository.GetChildren(_fileEntity.ParentId.Value);
 		}
 
 		private static Func<FileEntity, bool> SelectRange(int seqNum, int newSeqNum)

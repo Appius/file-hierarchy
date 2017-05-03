@@ -112,11 +112,15 @@ WHERE [h].[ParentId] IS NOT NULL;
 GO
 
 CREATE TRIGGER [DeleteHierarchy] ON [dbo].[Entities]
-BEFORE DELETE
+INSTEAD OF DELETE
 AS
     DELETE [t]
     FROM [Tree] [t]
-    JOIN [deleted] [d] on [d].Id = [t].[ChildId]
+    JOIN [deleted] [d] on [d].[Id] = [t].[ChildId]
+
+    DELETE [t]
+    FROM [Entities] [t]
+    JOIN [deleted] [d] on [d].[Id] = [t].[Id]
 GO
 
 ------------------------------------------------------------------------------------------------------------------------------

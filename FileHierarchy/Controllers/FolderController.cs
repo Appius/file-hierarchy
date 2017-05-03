@@ -14,8 +14,7 @@ namespace FileHierarchy.Controllers
 {
 	public class FolderController : BaseController
 	{
-		public FolderController(IFileRepository fileRepository, IFolderRepository folderRepository) : base(fileRepository,
-			folderRepository)
+		public FolderController(IFileRepository fileRepository) : base(fileRepository)
 		{
 		}
 
@@ -30,11 +29,11 @@ namespace FileHierarchy.Controllers
 		[ResponseType(typeof(IQueryable<FileViewModel>))]
 		public IHttpActionResult GetChildren(int id)
 		{
-			var folder = FolderRepository.Get(id);
+			var folder = FileRepository.GetFolder(id);
 			if (folder == null)
 				return NotFound();
 
-			var fileEntities = FolderRepository.GetChildren(id).ToList();
+			var fileEntities = FileRepository.GetChildren(id).OrderBy(f => f.SeqNum).ToList();
 			var fileViewModels = fileEntities.Select(e => e.ToFileViewModel());
 			return Ok(fileViewModels);
 		}
@@ -49,7 +48,7 @@ namespace FileHierarchy.Controllers
 		[ResponseType(typeof(FileViewModel))]
 		public IHttpActionResult GetFolder(int id)
 		{
-			var folder = FolderRepository.Get(id);
+			var folder = FileRepository.GetFolder(id);
 			if (folder == null)
 				return NotFound();
 
@@ -71,20 +70,20 @@ namespace FileHierarchy.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var folder = FolderRepository.Get(id);
+			var folder = FileRepository.GetFolder(id);
 			if (folder == null)
 				return NotFound();
 
-			FolderRepository.MarkModified(folder);
-			fileViewModel.UpdateFileEntity(FolderRepository, folder);
+			FileRepository.MarkModified(folder);
+			fileViewModel.UpdateFileEntity(FileRepository, folder);
 
 			try
 			{
-				FolderRepository.Update(folder);
+				FileRepository.Update(folder);
 			}
 			catch (DbUpdateConcurrencyException)
 			{
-				if (!FolderRepository.Exists(id))
+				if (!FileRepository.FolderExists(id))
 					return NotFound();
 
 				throw;
@@ -100,23 +99,23 @@ namespace FileHierarchy.Controllers
 		[SwaggerOperation("Create")]
 		[SwaggerResponse(HttpStatusCode.BadRequest)]
 		[SwaggerResponse(HttpStatusCode.Created)]
-		[ResponseType(typeof(FileEntity))]
+		[ResponseType(typeof(FileViewModel))]
 		public IHttpActionResult PostFolder(FileViewModel fileViewModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
 			// if ParentId is not a folder
-			if (fileViewModel.ParentId != null && !FolderRepository.Exists(fileViewModel.ParentId.Value))
+			if (fileViewModel.ParentId != null && !FileRepository.FolderExists(fileViewModel.ParentId.Value))
 				return BadRequest(ModelState);
 
 			var fileEntity = fileViewModel.ToFileEntity();
-			fileEntity.SeqNum = fileViewModel.GetNextSeqNumber(FolderRepository, fileEntity);
+			fileEntity.SeqNum = fileViewModel.GetNextSeqNumber(FileRepository, fileEntity);
 
 			fileEntity.Type = EntityType.Folder;
-			FolderRepository.Create(fileEntity);
+			FileRepository.Create(fileEntity);
 
-			return CreatedAtRoute("DefaultApi", new {id = fileViewModel.Id}, fileViewModel);
+			return CreatedAtRoute("DefaultApi", new {id = fileViewModel.Id}, fileEntity.ToFileViewModel());
 		}
 
 		/// <summary>
@@ -126,23 +125,27 @@ namespace FileHierarchy.Controllers
 		[SwaggerOperation("Delete")]
 		[SwaggerResponse(HttpStatusCode.BadRequest)]
 		[SwaggerResponse(HttpStatusCode.Created)]
-		[ResponseType(typeof(FileEntity))]
+		[ResponseType(typeof(FileViewModel))]
 		public IHttpActionResult DeleteFolder(int id)
 		{
-			var fileEntity = FolderRepository.Get(id);
+			var fileEntity = FileRepository.GetFolder(id);
 			if (fileEntity == null)
 				return NotFound();
 
-			var fileUpdater = new FileEntityUpdater(fileEntity, FolderRepository);
+			var children = FileRepository.GetChildren(id).ToList();
+			if (children.Count == 0)
+				return BadRequest(ModelState);
+
+			var fileUpdater = new FileEntityUpdater(fileEntity, FileRepository);
 			fileUpdater.ChangeSeqNum(int.MaxValue);
 
-			FolderRepository.SaveInTransaction(r =>
+			FileRepository.SaveInTransaction(r =>
 			{
 				r.Save();
 				r.Remove(fileEntity);
 			});
 
-			return Ok(fileEntity);
+			return Ok(fileEntity.ToFileViewModel());
 		}
 	}
 }

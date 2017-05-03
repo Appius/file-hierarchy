@@ -38,7 +38,6 @@ namespace FileHierarchy.App_Start
             // container.LoadConfiguration();
 
             container.RegisterType<IFileRepository, FileRepository>();
-            container.RegisterType<IFolderRepository, FolderRepository>();
         }
     }
 }

@@ -15,8 +15,7 @@ namespace FileHierarchy.Controllers
 {
 	public class FileController : BaseController
 	{
-		public FileController(IFileRepository fileRepository, IFolderRepository folderRepository) : base(fileRepository,
-			folderRepository)
+		public FileController(IFileRepository fileRepository) : base(fileRepository)
 		{
 		}
 
@@ -27,7 +26,7 @@ namespace FileHierarchy.Controllers
 		[SwaggerOperation("SearchByQuery")]
 		public IEnumerable<FileViewModel> Get(string query)
 		{
-			return FileRepository.Get(query, true).Select(e => e.ToFileViewModel());
+			return FileRepository.Search(query, true).Select(e => e.ToFileViewModel());
 		}
 
 		/// <summary>
@@ -40,7 +39,7 @@ namespace FileHierarchy.Controllers
 		[ResponseType(typeof(FileViewModel))]
 		public IHttpActionResult GetFile(int id)
 		{
-			var fileEntity = FileRepository.Get(id);
+			var fileEntity = FileRepository.GetFile(id);
 			if (fileEntity == null)
 				return NotFound();
 
@@ -62,24 +61,20 @@ namespace FileHierarchy.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var fileEntity = FileRepository.Get(id);
+			var fileEntity = FileRepository.GetFile(id);
 			if (fileEntity == null)
 				return NotFound();
 
 			FileRepository.MarkModified(fileEntity);
-			fileViewModel.UpdateFileEntity(FolderRepository, fileEntity);
+			fileViewModel.UpdateFileEntity(FileRepository, fileEntity);
 
 			try
 			{
-				FolderRepository.SaveInTransaction(() =>
-				{
-					FolderRepository.Save();
-					FileRepository.Save();
-				});
+				FileRepository.Save();
 			}
 			catch (DbUpdateConcurrencyException)
 			{
-				if (!FileRepository.Exists(id))
+				if (!FileRepository.FileExists(id))
 					return NotFound();
 				throw;
 			}
@@ -94,23 +89,23 @@ namespace FileHierarchy.Controllers
 		[SwaggerOperation("Create")]
 		[SwaggerResponse(HttpStatusCode.BadRequest)]
 		[SwaggerResponse(HttpStatusCode.Created)]
-		[ResponseType(typeof(FileEntity))]
+		[ResponseType(typeof(FileViewModel))]
 		public IHttpActionResult PostFile(FileViewModel fileViewModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
 			// if ParentId is not a folder
-			if (fileViewModel.ParentId != null && !FolderRepository.Exists(fileViewModel.ParentId.Value))
+			if (fileViewModel.ParentId != null && !FileRepository.FolderExists(fileViewModel.ParentId.Value))
 				return BadRequest(ModelState);
 
 			var fileEntity = fileViewModel.ToFileEntity();
-			fileEntity.SeqNum = fileViewModel.GetNextSeqNumber(FolderRepository, fileEntity);
+			fileEntity.SeqNum = fileViewModel.GetNextSeqNumber(FileRepository, fileEntity);
 
 			fileEntity.Type = EntityType.File;
 			FileRepository.Create(fileEntity);
 
-			return CreatedAtRoute("DefaultApi", new {id = fileViewModel.Id}, fileViewModel);
+			return CreatedAtRoute("DefaultApi", new {id = fileViewModel.Id}, fileEntity.ToFileViewModel());
 		}
 
 		/// <summary>
@@ -118,25 +113,24 @@ namespace FileHierarchy.Controllers
 		/// </summary>
 		/// <param name="id">File ID</param>
 		[SwaggerOperation("Delete")]
-		[SwaggerResponse(HttpStatusCode.BadRequest)]
 		[SwaggerResponse(HttpStatusCode.OK)]
-		[ResponseType(typeof(FileEntity))]
+		[ResponseType(typeof(FileViewModel))]
 		public IHttpActionResult DeleteFile(int id)
 		{
-			var fileEntity = FileRepository.Get(id);
+			var fileEntity = FileRepository.GetFile(id);
 			if (fileEntity == null)
 				return NotFound();
 
-			var fileUpdater = new FileEntityUpdater(fileEntity, FolderRepository);
+			var fileUpdater = new FileEntityUpdater(fileEntity, FileRepository);
 			fileUpdater.ChangeSeqNum(int.MaxValue);
 
-			FolderRepository.SaveInTransaction(() =>
+			FileRepository.SaveInTransaction(r =>
 			{
-				FolderRepository.Save();
-				FileRepository.Remove(fileEntity);
+				r.Save();
+				r.Remove(fileEntity);
 			});
 
-			return Ok(fileEntity);
+			return Ok(fileEntity.ToFileViewModel());
 		}
 	}
 }

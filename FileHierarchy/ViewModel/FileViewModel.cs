@@ -18,7 +18,7 @@ namespace FileHierarchy.ViewModel
 
 		public EntityType Type { get; set; }
 
-		public void UpdateFileEntity(IFolderRepository folderRepository, FileEntity fileEntity)
+		public void UpdateFileEntity(IFileRepository folderRepository, FileEntity fileEntity)
 		{
 			var fileEntityUpdater = new FileEntityUpdater(fileEntity, folderRepository);
 
@@ -32,7 +32,7 @@ namespace FileHierarchy.ViewModel
 			}
 		}
 
-		public int GetNextSeqNumber(IFolderRepository folderRepository, FileEntity fileEntity)
+		public int GetNextSeqNumber(IFileRepository folderRepository, FileEntity fileEntity)
 		{
 			var fileEntityUpdater = new FileEntityUpdater(fileEntity, folderRepository);
 

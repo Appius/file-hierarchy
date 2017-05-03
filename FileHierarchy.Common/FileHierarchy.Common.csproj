@@ -41,9 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Abstract\IBaseRepository.cs" />
     <Compile Include="Abstract\IFileRepository.cs" />
-    <Compile Include="Abstract\IFolderRepository.cs" />
     <Compile Include="Models\EntityType.cs" />
     <Compile Include="Models\FileEntity.cs" />
     <Compile Include="Models\Tree.cs" />
